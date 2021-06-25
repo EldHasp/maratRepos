@@ -1,35 +1,13 @@
-﻿
-using Laboratoria.MVVM;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using Simplified;
 
 namespace Laboratoria.ViewModels
 {
-    class UsersViewModel : ObservableObject
+    public class UsersViewModel : BaseInpc
     {
 
-        private string fio;
-        public string Fio
-        {
-            get { return fio; }
-            set
-            {
-                fio = value;
-                RaisePropertyChangedEvent("Fio");
-            }
-        }
-        private string position;
-        public string Position
-        {
-            get { return position; }
-            set
-            {
-                position = value;
-                RaisePropertyChangedEvent("Position");
-            }
-        }
+        private string _fio;
+        public string Fio { get => _fio; set => Set(ref _fio, value); }
+        private string _position;
+        public string Position { get => _position; set => Set(ref _position, value); }
     }
 }

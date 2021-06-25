@@ -1,29 +1,13 @@
 ﻿
-using Laboratoria.MVVM;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+using Simplified;
 
 namespace Laboratoria.Models
 {
-    public class AccModel : ObservableObject
+    public class AccModel : BaseInpc
     {
         //ФИО начальника смены
-        private string FIO_nach;
-        public string FIO_Nach
-        {
-            get
-            {
-                return FIO_nach;
-            }
-            set
-            {
-                FIO_nach = value;
-                RaisePropertyChangedEvent("FIO_Nach");
-            }
-        }
+        private string _fioNach;
+        public string FIO_Nach { get => _fioNach; set => Set(ref _fioNach, value); }
         //ФИО лаборантки
         public string FIO_Lab { get; set; }
         //Номер смены

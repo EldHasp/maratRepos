@@ -1,165 +1,118 @@
 ﻿using Laboratoria.Models;
-using Laboratoria.MVVM;
+using Simplified;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data.Entity;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Laboratoria.ViewModels
 {
-    class AccauntViewModel : ObservableObject, IDataErrorInfo
+    public class AccauntViewModel : BaseInpc, IDataErrorInfo
     {
         //кнопка подтверждения
         public ICommand BtnCommand { get; set; }
 
-        private Dispatcher dispatcher = Dispatcher.CurrentDispatcher;
-        private ObservableCollection<UsersViewModel> users = new ObservableCollection<UsersViewModel>();
-        public ObservableCollection<UsersViewModel> Users
-        {
-            get { return users; }
-            set
-            {
-                users = value;
-                RaisePropertyChangedEvent("Users");
-            }
-        }
+        private readonly Dispatcher dispatcher = Dispatcher.CurrentDispatcher;
+        public ObservableCollection<UsersViewModel> Users { get; }
+            = new ObservableCollection<UsersViewModel>();
 
         // загружаем данные
         public AccauntViewModel()
         {
-            BtnCommand = new DelegateCommand(Confirmation);
-            Task.Run(() => Smena_Fill());         
+            BtnCommand = new RelayCommand(Confirmation);
+            SmenaFillAsync();
         }
 
 
         // читаем юзеров для комбобокса
-        private async Task Smena_Fill()
-        {        
-            using (UsersSmenaContext ctx = new UsersSmenaContext())
-            {
-                var q = await (from c in ctx.UsersSmenas select c).ToListAsync();
-                foreach (UserSmena userSmena in q)
-                {                                 
-                        dispatcher.Invoke(() => Users.Add(new UsersViewModel()
-                        {
-                            Fio = userSmena.FIO,
-                            Position = userSmena.Position,                         
-                        }));                 
-                }
-            }            
-        }
-
-
-        private ObservableCollection<AccModel> _AccModel;
-        public ObservableCollection<AccModel> AccModel
+        private async void SmenaFillAsync()
         {
-            get { return _AccModel; }
-            set
+            try
             {
-                _AccModel = value;
-                RaisePropertyChangedEvent("AccModel");
+                var users = await Task.Run(GetUsersSmenas);
+                var result = dispatcher.BeginInvoke(new Action(() =>
+                {
+                    foreach (UsersViewModel userSmena in users)
+                        Users.Add(userSmena);
+
+                }));
+                await result.Task;
+
+            }
+            catch (Exception ex)
+            {
+                // Здесь вывод об ошибке
             }
         }
+
+        private static UsersViewModel Create(UserSmena userSmena)
+            => new UsersViewModel()
+            {
+                Fio = userSmena.FIO,
+                Position = userSmena.Position,
+            };
+
+        private static IEnumerable<UsersViewModel> GetUsersSmenas()
+        {
+            using (UsersSmenaContext ctx = new UsersSmenaContext())
+                return ctx.UsersSmenas
+                    .ToList()
+                    .Select(Create)
+                    .ToList();
+        }
+
+
+        public ObservableCollection<AccModel> AccModel { get; }
+            = new ObservableCollection<AccModel>();
 
         //ФИО начальника смены
-        private string FIO_nach;
-        public string FIO_Nach
-        {
-            get
-            {
-                return FIO_nach;
-            }
-            set
-            {
-                FIO_nach = value;
-                RaisePropertyChangedEvent("FIO_Nach");
-            }
-        }
-        //ФИО лаборантки
-        private string FIO_lab;
-        public string FIO_Lab
-        {
-            get
-            {
-                return FIO_lab;
-            }
-            set
-            {
-                FIO_lab = value;
-                RaisePropertyChangedEvent("FIO_Lab");
-            }
-        }
+        private string _fioNach;
+        public string FioNach { get => _fioNach; set => Set(ref _fioNach, value); }
 
-        List<string> _source_Smena = new List<string> { "Смена №1", "Смена №2", "Смена №3", "Смена №4" };
-        public List<string> Source_Smena
-        {
-            get { return _source_Smena; }
-        }
-        List<string> _source_TSmena = new List<string> { "08:00-20:00", "20:00-08:00" };
-        public List<string> Source_TSmena
-        {
-            get { return _source_TSmena; }
-        }
+        //ФИО лаборантки
+        private string _fioLab;
+        public string FioLab { get => _fioLab; set => Set(ref _fioLab, value); }
+
+        public IReadOnlyList<string> SourceSmena { get; }
+            = new List<string>
+            {
+                "Смена №1",
+                "Смена №2",
+                "Смена №3",
+                "Смена №4"
+            }
+            .AsReadOnly();
+
+        public IReadOnlyList<string> SourceTSmena { get; }
+            = new List<string> { "08:00-20:00", "20:00-08:00" }
+            .AsReadOnly();
 
 
         //Номер смены
-        private string Number_smena;
-        public string Number_Smena
-        {
-            get
-            {
-                return Number_smena;
-            }
-            set
-            {
-                Number_smena = value;
-                RaisePropertyChangedEvent("Number_Smena");
-            }
-        }
+        private string _numberSmena;
+        public string NumberSmena { get => _numberSmena; set => Set(ref _numberSmena, value); }
+
         //начало конец смены
-        private string Time_smena;
-        public string Time_Smena
-        {
-            get
-            {
-                return Time_smena;
-            }
-            set
-            {
-                Time_smena = value;
-                RaisePropertyChangedEvent("Time_Smena");
-            }
-        }
+        private string _timeSmena;
+        public string TimeSmena { get => _timeSmena; set => Set(ref _timeSmena, value); }
 
         //Дата смены
-        private DateTime? Date_smena;
-        public DateTime? Date_Smena
-        {
-            get
-            {
-                return Date_smena;
-            }
-            set
-            {
-                Date_smena = value;
-                RaisePropertyChangedEvent("Date_Smena");
-            }
-        }
+        private DateTime? _dateSmena;
+        public DateTime? DateSmena { get => _dateSmena; set => Set(ref _dateSmena, value); }
 
         public string Error
         {
             get { throw new NotImplementedException(); }
         }
+
         private int _errors = 0;
 
         public string this[string columnName]
@@ -169,33 +122,33 @@ namespace Laboratoria.ViewModels
                 string result = null;
                 if (columnName == "FIO_Nach")
                 {
-                    if (string.IsNullOrEmpty(FIO_Nach) || FIO_Nach.Length < 6)
+                    if (string.IsNullOrEmpty(FioNach) || FioNach.Length < 6)
                         result = "Выберите ФИО начальника смены";
                 }
                 if (columnName == "FIO_Lab")
                 {
-                    if (string.IsNullOrEmpty(FIO_lab) || FIO_lab.Length < 6)
+                    if (string.IsNullOrEmpty(_fioLab) || _fioLab.Length < 6)
                         result = "Выберите ФИО лаборантки";
                 }
                 if (columnName == "Number_Smena")
                 {
-                    if (string.IsNullOrEmpty(Number_Smena) || Number_Smena.Length < 6)
+                    if (string.IsNullOrEmpty(NumberSmena) || NumberSmena.Length < 6)
                         result = "Выберите номер смены";
                 }
                 if (columnName == "Time_Smena")
                 {
-                    if (string.IsNullOrEmpty(Time_Smena) || Time_Smena.Length < 6)
+                    if (string.IsNullOrEmpty(TimeSmena) || TimeSmena.Length < 6)
                         result = "Выберите  начало и конец смены";
                 }
                 if (columnName == "Date_Smena")
                 {
-                    if (string.IsNullOrEmpty(Date_Smena.ToString()) || Date_Smena.ToString().Length < 6)
+                    if (string.IsNullOrEmpty(DateSmena.ToString()) || DateSmena.ToString().Length < 6)
                     { result = "Выберите дату начала смены"; }
-                    else 
+                    else
                     {
-                       string s= Convert.ToDateTime(Date_Smena).ToString("dd-MM-yyyy");
-                        int comparison;                  
-                        comparison = Convert.ToDateTime(Date_Smena).CompareTo(DateTime.Now);             
+                        string s = Convert.ToDateTime(DateSmena).ToString("dd-MM-yyyy");
+                        int comparison;
+                        comparison = Convert.ToDateTime(DateSmena).CompareTo(DateTime.Now);
                         if (comparison > 0)
                         {
                             result = "Дата больше текущей";
@@ -225,27 +178,27 @@ namespace Laboratoria.ViewModels
             }
         }
 
-     
 
-        public void Confirmation(object o)
+
+        public void Confirmation()
         {
             string start = "";
             string end = "";
 
-            if (Time_Smena == "08:00-20:00")
+            if (TimeSmena == "08:00-20:00")
             {
-                DateTime s = Convert.ToDateTime(Date_Smena).Add(new TimeSpan(08, 00, 00));
+                DateTime s = Convert.ToDateTime(DateSmena).Add(new TimeSpan(08, 00, 00));
                 start = s.ToString();
                 //
-                DateTime s1 = Convert.ToDateTime(Date_Smena).Add(new TimeSpan(20, 00, 00));
+                DateTime s1 = Convert.ToDateTime(DateSmena).Add(new TimeSpan(20, 00, 00));
                 end = s1.ToString();
             }
-            else if (Time_Smena == "20:00-08:00")
+            else if (TimeSmena == "20:00-08:00")
             {
-                DateTime s = Convert.ToDateTime(Date_Smena).Add(new TimeSpan(20, 00, 00));
+                DateTime s = Convert.ToDateTime(DateSmena).Add(new TimeSpan(20, 00, 00));
                 start = s.ToString();
                 //
-                DateTime s1 = Convert.ToDateTime(Date_Smena).AddDays(1);
+                DateTime s1 = Convert.ToDateTime(DateSmena).AddDays(1);
                 DateTime s2 = s1.Date.Add(new TimeSpan(08, 00, 00));
                 end = s2.ToString();
             }
@@ -254,9 +207,9 @@ namespace Laboratoria.ViewModels
 
 
             string message = "Проверте правильно ли забиты данные?\n";
-            message += "Ф.И.О нач. смены: "+ FIO_Nach+ "\n";
-            message += "Ф.И.О лаборантки: " + FIO_Lab + "\n";
-            message += Number_Smena.ToString() + "\n";
+            message += "Ф.И.О нач. смены: " + FioNach + "\n";
+            message += "Ф.И.О лаборантки: " + FioLab + "\n";
+            message += NumberSmena.ToString() + "\n";
             message += "Начало смены: " + start + "\n";
             message += "Конец смены: " + end + "\n";
             string caption = "Подтверждение!!!";
@@ -269,9 +222,9 @@ namespace Laboratoria.ViewModels
              MessageBoxImage.Question);
             if (mess == MessageBoxResult.Yes)
             {
-                
 
-                
+
+
             }
 
         }

@@ -1,65 +1,59 @@
 ﻿using Laboratoria.Models;
-using Laboratoria.MVVM;
+using Simplified;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 
 namespace Laboratoria.ViewModels
 {
-    class MainViewModel : ObservableObject
+    class MainViewModel : BaseInpc
     {
+        private readonly Dispatcher dispatcher = Dispatcher.CurrentDispatcher;
+
         // загружаем данные
         public MainViewModel()
         {
 
-            Task.Run(() => Smena_Fill());
+            SmenaFillAsync();
         }
 
-        private ObservableCollection<AccauntViewModel> _AccauntViewModel;
-        public ObservableCollection<AccauntViewModel> AccauntViewModel
+        public ObservableCollection<AccauntViewModel> Accaunts { get; }
+            = new ObservableCollection<AccauntViewModel>();
+
+        public ObservableCollection<AccModel> AccModel { get; }
+            = new ObservableCollection<AccModel>();
+
+        private async void SmenaFillAsync()
         {
-            get { return _AccauntViewModel; }
-            set
+            try
             {
-                _AccauntViewModel = value;
-                RaisePropertyChangedEvent("AccauntViewModel");
+                var accaunts = await Task.Run(GetAccaunts);
+                var result = dispatcher.BeginInvoke(new Action(() =>
+                {
+                    foreach (var acc in accaunts)
+                        Accaunts.Add(acc);
+
+                }));
+                await result.Task;
+
+            }
+            catch (Exception ex)
+            {
+                // Здесь вывод об ошибке
             }
         }
 
-        private ObservableCollection<AccModel> _AccModel;
-        public ObservableCollection<AccModel> AccModel
+        private static IEnumerable<AccauntViewModel> GetAccaunts()
         {
-            get { return _AccModel; }
-            set
-            {
-                _AccModel = value;
-                RaisePropertyChangedEvent("AccModel");
-            }
-        }
-
-        private void Smena_Fill()
-        {
-           
+            using (UsersSmenaContext ctx = new UsersSmenaContext())
+                return new AccauntViewModel[0]; // Чё-то возвращаем
         }
 
         //Первая монета
-        private string FIO_nach;
-        public string FIO_Nach
-        {
-            get
-            {
-                Smena_Fill();
-                return FIO_nach;
-            }
-            set
-            {
-                FIO_nach = value;
-                RaisePropertyChangedEvent("FIO_Nach");
-            }
-        }
+        private string _fioNach;
+        public string FioNach { get => _fioNach; set => Set(ref _fioNach, value); }
     }
 
   

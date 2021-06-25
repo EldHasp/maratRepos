@@ -134,9 +134,6 @@
     <Compile Include="Models\AccModel.cs" />
     <Compile Include="Models\UserSmena.cs" />
     <Compile Include="Models\UsersSmenaContext.cs" />
-    <Compile Include="MVVM\DelegateCommand.cs" />
-    <Compile Include="MVVM\DelegateCommandPercent.cs" />
-    <Compile Include="MVVM\ObservableObject.cs" />
     <Compile Include="ViewModels\AccauntViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\UsersViewModel.cs" />
