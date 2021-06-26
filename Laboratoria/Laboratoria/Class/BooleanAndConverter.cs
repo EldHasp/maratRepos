@@ -11,14 +11,15 @@ namespace Laboratoria.Class
     {
         public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            bool res = false;
+            //bool res = false;
             int[] mass= new int[values.Length];
             int count = 0;
             int sum = 0;
             // Пишем в массив
             foreach (object value in values)
             {
-                if ((value is bool) && (bool)value == false)
+                //if ((value is bool) && (bool)value == false)
+                if (Equals(value, false))
                 {
                     mass[count] = 0;
                 }

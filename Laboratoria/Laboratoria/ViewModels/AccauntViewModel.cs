@@ -1,4 +1,5 @@
-﻿using Laboratoria.Models;
+﻿using Laboratoria.Dto;
+using Laboratoria.Model;
 using Simplified;
 using System;
 using System.Collections.Generic;
@@ -17,71 +18,68 @@ namespace Laboratoria.ViewModels
 {
     public class AccauntViewModel : BaseInpc, IDataErrorInfo
     {
-        //кнопка подтверждения
-        public ICommand BtnCommand { get; set; }
+
+        private readonly UsersModel model;
+
+        public AccauntViewModel(UsersModel model)
+        {
+            this.model = model;
+            Positons = model.GetPositions();
+            UsersFillAsync();
+        }
+
+        public IReadOnlyList<string> Positons { get; }
 
         private readonly Dispatcher dispatcher = Dispatcher.CurrentDispatcher;
-        public ObservableCollection<UsersViewModel> Users { get; }
-            = new ObservableCollection<UsersViewModel>();
+        //public ObservableCollection<UsersViewModel> Users { get; }
+        //    = new ObservableCollection<UsersViewModel>();
+        public ObservableCollection<UserSmenaDto> Users { get; }
+            = new ObservableCollection<UserSmenaDto>();
 
-        // загружаем данные
-        public AccauntViewModel()
-        {
-            BtnCommand = new RelayCommand(Confirmation);
-            SmenaFillAsync();
-        }
+        //// загружаем данные
+        //public AccauntViewModel()
+        //{
+        //    BtnCommand = new RelayCommand(Confirmation);
+        //    UsersFillAsync();
+        //}
 
 
         // читаем юзеров для комбобокса
-        private async void SmenaFillAsync()
+        private async void UsersFillAsync()
         {
             try
             {
-                var users = await Task.Run(GetUsersSmenas);
+                var users = await model.GetUsersAsync();
                 var result = dispatcher.BeginInvoke(new Action(() =>
                 {
-                    foreach (UsersViewModel userSmena in users)
+                    foreach (var userSmena in users)
                         Users.Add(userSmena);
 
                 }));
                 await result.Task;
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Здесь вывод об ошибке
             }
         }
 
-        private static UsersViewModel Create(UserSmena userSmena)
-            => new UsersViewModel()
-            {
-                Fio = userSmena.FIO,
-                Position = userSmena.Position,
-            };
 
-        private static IEnumerable<UsersViewModel> GetUsersSmenas()
-        {
-            using (UsersSmenaContext ctx = new UsersSmenaContext())
-                return ctx.UsersSmenas
-                    .ToList()
-                    .Select(Create)
-                    .ToList();
-        }
+        //public ObservableCollection<AccModel> AccModel { get; }
+        //    = new ObservableCollection<AccModel>();
 
 
-        public ObservableCollection<AccModel> AccModel { get; }
-            = new ObservableCollection<AccModel>();
 
         //ФИО начальника смены
-        private string _fioNach;
-        public string FioNach { get => _fioNach; set => Set(ref _fioNach, value); }
+        private UserSmenaDto _nach;
+        public UserSmenaDto Nach { get => _nach; set => Set(ref _nach, value); }
 
         //ФИО лаборантки
-        private string _fioLab;
-        public string FioLab { get => _fioLab; set => Set(ref _fioLab, value); }
+        private UserSmenaDto _lab;
+        public UserSmenaDto Lab { get => _lab; set => Set(ref _lab, value); }
 
-        public IReadOnlyList<string> SourceSmena { get; }
+        public IReadOnlyList<string> Smenas { get; }
             = new List<string>
             {
                 "Смена №1",
@@ -91,14 +89,14 @@ namespace Laboratoria.ViewModels
             }
             .AsReadOnly();
 
-        public IReadOnlyList<string> SourceTSmena { get; }
+        public IReadOnlyList<string> TimesSmenas { get; }
             = new List<string> { "08:00-20:00", "20:00-08:00" }
             .AsReadOnly();
 
 
         //Номер смены
-        private string _numberSmena;
-        public string NumberSmena { get => _numberSmena; set => Set(ref _numberSmena, value); }
+        private string _nameSmena;
+        public string NameSmena { get => _nameSmena; set => Set(ref _nameSmena, value); }
 
         //начало конец смены
         private string _timeSmena;
@@ -108,56 +106,67 @@ namespace Laboratoria.ViewModels
         private DateTime? _dateSmena;
         public DateTime? DateSmena { get => _dateSmena; set => Set(ref _dateSmena, value); }
 
-        public string Error
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public string Error => string.Join(Environment.NewLine,
+            errors
+            .Where(pair => !string.IsNullOrWhiteSpace(pair.Value))
+            .Select(pair => $"{pair.Key}: \"{pair.Value}\""));
 
-        private int _errors = 0;
+        //private int _errors = 0;
 
         public string this[string columnName]
         {
             get
             {
-                string result = null;
-                if (columnName == "FIO_Nach")
+                string error = null;
+                if (columnName == nameof(Nach))
                 {
-                    if (string.IsNullOrEmpty(FioNach) || FioNach.Length < 6)
-                        result = "Выберите ФИО начальника смены";
+                    if (Nach?.Position != Positons[0] || !Users.Contains(Nach))
+                        error = "Выберите ФИО начальника смены";
                 }
-                if (columnName == "FIO_Lab")
+                else if (columnName == nameof(Lab))
                 {
-                    if (string.IsNullOrEmpty(_fioLab) || _fioLab.Length < 6)
-                        result = "Выберите ФИО лаборантки";
+                    if (Lab?.Position != Positons[1] || !Users.Contains(Lab))
+                        error = "Выберите ФИО лаборантки";
                 }
-                if (columnName == "Number_Smena")
+                else if (columnName == nameof(NameSmena))
                 {
-                    if (string.IsNullOrEmpty(NumberSmena) || NumberSmena.Length < 6)
-                        result = "Выберите номер смены";
+                    if (NameSmena == null || !Smenas.Contains(NameSmena))
+                        error = "Выберите номер смены";
                 }
-                if (columnName == "Time_Smena")
+                else if (columnName == nameof(TimeSmena))
                 {
-                    if (string.IsNullOrEmpty(TimeSmena) || TimeSmena.Length < 6)
-                        result = "Выберите  начало и конец смены";
+                    if (TimeSmena == null || !TimeSmena.Contains(TimeSmena))
+                        error = "Выберите  начало и конец смены";
                 }
-                if (columnName == "Date_Smena")
+                else if (columnName == nameof(DateSmena))
                 {
-                    if (string.IsNullOrEmpty(DateSmena.ToString()) || DateSmena.ToString().Length < 6)
-                    { result = "Выберите дату начала смены"; }
+                    if (DateSmena == null)
+                    {
+                        error = "Выберите дату начала смены";
+                    }
                     else
                     {
-                        string s = Convert.ToDateTime(DateSmena).ToString("dd-MM-yyyy");
-                        int comparison;
-                        comparison = Convert.ToDateTime(DateSmena).CompareTo(DateTime.Now);
-                        if (comparison > 0)
+                        if (DateSmena > DateTime.Now)
                         {
-                            result = "Дата больше текущей";
+                            error = "Дата больше текущей";
                         }
                     }
                 }
-                return result;
+
+                if (string.IsNullOrWhiteSpace(error))
+                {
+                    if (errors.ContainsKey(columnName))
+                        errors.Remove(columnName);
+                }
+                else
+                    errors[columnName] = error;
+
+                return error;
             }
         }
+
+
+        private readonly Dictionary<string, string> errors = new Dictionary<string, string>();
 
         // для подсчета кол-ва не забитых данных для валидации
         public void Validation_Error(object sender, ValidationErrorEventArgs e)
@@ -165,14 +174,14 @@ namespace Laboratoria.ViewModels
             if (e.Action == ValidationErrorEventAction.Added)
             {
                 ((Control)sender).ToolTip = e.Error.ErrorContent.ToString();
-                _errors++;
+                //_errors++;
             }
             else
             {
                 if (!((BindingExpressionBase)e.Error.BindingInError).HasError)
                 {
                     ((Control)sender).ToolTip = "";
-                    _errors--;
+                    //_errors--;
                 }
 
             }
@@ -207,9 +216,9 @@ namespace Laboratoria.ViewModels
 
 
             string message = "Проверте правильно ли забиты данные?\n";
-            message += "Ф.И.О нач. смены: " + FioNach + "\n";
-            message += "Ф.И.О лаборантки: " + FioLab + "\n";
-            message += NumberSmena.ToString() + "\n";
+            message += "Ф.И.О нач. смены: " + Nach + "\n";
+            message += "Ф.И.О лаборантки: " + Lab + "\n";
+            message += NameSmena.ToString() + "\n";
             message += "Начало смены: " + start + "\n";
             message += "Конец смены: " + end + "\n";
             string caption = "Подтверждение!!!";
@@ -227,6 +236,36 @@ namespace Laboratoria.ViewModels
 
             }
 
+        }
+
+
+        private RelayCommand _addAccountCommand;
+        public RelayCommand AddAccountCommand => _addAccountCommand
+            ?? (_addAccountCommand = new RelayCommand(AddAccountExecute, AddAccountCanExecute));
+
+        private bool AddAccountCanExecute()
+        {
+            // Здесь проверка правильности всех данных
+            // если данные правильные, то возвращается истина
+
+            return errors.Count == 0;
+        }
+
+        private void AddAccountExecute()
+        {
+            DateTime start = new DateTime(), end = new DateTime(), date = DateSmena.Value;
+            if (TimeSmena == "08:00-20:00")
+            {
+                start = date.Date.AddHours(8);
+                end = date.Date.AddHours(20);
+            }
+            else if (TimeSmena == "20:00-08:00")
+            {
+                start = date.Date.AddHours(20);
+                end = date.Date.AddDays(1).AddHours(8);
+            }
+
+            var acc = model.AddAccount(Nach, Lab, NameSmena, start, end);
         }
     }
 }

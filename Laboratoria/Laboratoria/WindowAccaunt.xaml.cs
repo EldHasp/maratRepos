@@ -1,4 +1,6 @@
 ﻿using Laboratoria.Class;
+using Laboratoria.Dto;
+using Laboratoria.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,16 +23,17 @@ namespace Laboratoria
     /// </summary>
     public partial class WindowAccaunt : Window
     {
-       
-       //private Validations _validation = new Validations();  
+
+        //private Validations _validation = new Validations();  
         private Dispatcher dispatcher = Dispatcher.CurrentDispatcher;
 
         public WindowAccaunt()
         {
+            DataContextChanged += (s, e) => viewModels = (AccauntViewModel)e.NewValue;
             InitializeComponent();
             //grid_ValidationsData.DataContext = _validation;
         }
-
+        private AccauntViewModel viewModels;
         // выход  с окошка
         private void BtnExit_Click(object sender, RoutedEventArgs e)
         {
@@ -45,8 +48,17 @@ namespace Laboratoria
             if (e.ChangedButton == MouseButton.Left)
                 this.DragMove();
         }
-      
 
+        private void OnLabsFilter(object sender, FilterEventArgs e)
+        {
+            UserSmenaDto user = (UserSmenaDto)e.Item;
+            e.Accepted = user.Position == viewModels.Positons[1];
+        }
 
+        private void OnNachsFilter(object sender, FilterEventArgs e)
+        {
+            UserSmenaDto user = (UserSmenaDto)e.Item;
+            e.Accepted = user.Position == viewModels.Positons[0];
+        }
     }
 }

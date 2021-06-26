@@ -5,19 +5,32 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Laboratoria"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        xmlns:ViewModels="clr-namespace:Laboratoria.ViewModels" x:Class="Laboratoria.WindowAccaunt"
+        xmlns:vm="clr-namespace:Laboratoria.ViewModels" x:Class="Laboratoria.WindowAccaunt"
         mc:Ignorable="d" Foreground="White" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" WindowStyle="None"
-        xmlns:local1="clr-namespace:Laboratoria.Class"
-        Title="WindowAccaunt" Height="500" Width="400" MouseDown="Window_MouseDown">
-   
-    <Window.DataContext>
-        <ViewModels:AccauntViewModel/>
-    </Window.DataContext>
-
+        xmlns:class="clr-namespace:Laboratoria.Class" xmlns:cnvs="clr-namespace:WpfMvvm.Converters;assembly=Common" xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+    Title="WindowAccaunt" Height="500" Width="400" MouseDown="Window_MouseDown"
+    d:DataContext="{x:Type vm:AccauntViewModel}">
 
     <Window.Resources>
-        <local1:BooleanNotConverter x:Key="BooleanNotConverter"/>
-        <local1:BooleanAndConverter x:Key="BooleanAndConverter"/>
+        <cnvs:BooleanNotConverter x:Key="BooleanNotConverter"/>
+        <class:BooleanAndConverter x:Key="BooleanAndConverter"/>
+        <CollectionViewSource x:Key="nachs"
+                              IsLiveFilteringRequested="True"
+                              Source="{Binding Users}"
+                              Filter="OnNachsFilter">
+            <CollectionViewSource.LiveFilteringProperties>
+                <sys:String>Positions</sys:String>
+            </CollectionViewSource.LiveFilteringProperties>
+        </CollectionViewSource>
+        <CollectionViewSource x:Key="labs"
+                              IsLiveFilteringRequested="True"
+                              Source="{Binding Users}"
+                              Filter="OnLabsFilter">
+            <CollectionViewSource.LiveFilteringProperties>
+                <sys:String>Positions</sys:String>
+            </CollectionViewSource.LiveFilteringProperties>
+        </CollectionViewSource>
+
     </Window.Resources>
 
     <Border BorderBrush="White" BorderThickness="2">
@@ -79,54 +92,23 @@
                             <!--<TextBox x:Name="textBox_Login_Binance" Grid.Column="1" Grid.Row="0"  Validation.Error="Validation_Error"
                  Text="{Binding UpdateSourceTrigger=PropertyChanged, Path=Fio,
                         ValidatesOnDataErrors=true, NotifyOnValidationError=true}" />-->
-                            <ComboBox x:Name="tbFIO_Nach" Foreground="Aquamarine" Grid.Column="1" Grid.Row="0" ItemsSource="{Binding Users}" 
-                                      SelectedValuePath="Fio" 
-                                      SelectedValue="{Binding FIO_Nach , Mode=TwoWay,ValidatesOnDataErrors=True, NotifyOnValidationError=True, ValidatesOnExceptions=True }"
-                                       >
-                                <ComboBox.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Fio}"></TextBlock>
-                                </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                                <ComboBox.ItemContainerStyle>
-                                    <Style TargetType="ComboBoxItem">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Position}" Value="2">
-                                                <Setter Property="Visibility" Value="Collapsed"></Setter>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ComboBox.ItemContainerStyle>
-                            </ComboBox>
-                           
-
+                            <ComboBox Foreground="Aquamarine" Grid.Column="1" Grid.Row="0"
+                                      ItemsSource="{Binding Mode=OneWay, Source={StaticResource nachs}}"
+                                      DisplayMemberPath="Fio"
+                                      SelectedItem="{Binding Nach, Mode=TwoWay, ValidatesOnDataErrors=True, NotifyOnValidationError=True, ValidatesOnExceptions=True}"/>
 
                             <TextBlock  Grid.Column="0" Grid.Row="1" Text="ФИО лаборантки:" VerticalAlignment="Center" FontSize="16"/>
-                            <ComboBox x:Name="tbFIO_Lab" Foreground="Aquamarine" Grid.Column="1" Grid.Row="1" ItemsSource="{Binding Users}" 
-                                       SelectedValuePath="Fio" 
-                                      SelectedValue="{Binding FIO_Lab , Mode=TwoWay,ValidatesOnDataErrors=True, NotifyOnValidationError=True, ValidatesOnExceptions=True }"
+                            <ComboBox Foreground="Aquamarine" Grid.Column="1" Grid.Row="1"
+                                      ItemsSource="{Binding Mode=OneWay, Source={StaticResource labs}}"
+                                      DisplayMemberPath="Fio" 
+                                      SelectedItem="{Binding Lab, Mode=TwoWay, ValidatesOnDataErrors=True, NotifyOnValidationError=True, ValidatesOnExceptions=True}"
                                        >
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding Fio}"></TextBlock>
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                                <ComboBox.ItemContainerStyle>
-                                    <Style TargetType="ComboBoxItem">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Position}" Value="1">
-                                                <Setter Property="Visibility" Value="Collapsed"></Setter>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ComboBox.ItemContainerStyle>
                             </ComboBox>
-                            <TextBlock  Grid.Column="0" Grid.Row="2" Text="Смена №:" VerticalAlignment="Center" FontSize="16"/>
-                            <ComboBox x:Name="tbNumber_Smena" Foreground="Aquamarine" Grid.Column="1" Grid.Row="3" 
-                                        SelectedValue="{Binding Number_Smena , Mode=TwoWay,ValidatesOnDataErrors=True, NotifyOnValidationError=True, ValidatesOnExceptions=True }"
-                                     ItemsSource="{Binding Source_Smena}" >
-                               
-                            </ComboBox>
+                            <TextBlock  Grid.Column="0" Grid.Row="2" Text="Смена:" VerticalAlignment="Center" FontSize="16"/>
+                            <ComboBox Foreground="Aquamarine" Grid.Column="1" Grid.Row="3"
+                                      ItemsSource="{Binding Smenas}" 
+                                      SelectedItem="{Binding NameSmena, Mode=TwoWay, ValidatesOnDataErrors=True, NotifyOnValidationError=True, ValidatesOnExceptions=True}"/>
+
                         </Grid>
                         <Grid Grid.Row="1">
                             <GroupBox>
@@ -143,17 +125,17 @@
                                         <RowDefinition Height="80"/>
                                     </Grid.RowDefinitions>
                                     <TextBlock  Grid.Column="0" Grid.Row="0" Text="Смена" VerticalAlignment="Center" FontSize="16"/>
-                                    <ComboBox x:Name="tbTime_Smena" Foreground="Aquamarine" Grid.Column="1" Grid.Row="0"
-                                              SelectedValue="{Binding Time_Smena , Mode=TwoWay,ValidatesOnDataErrors=True, NotifyOnValidationError=True, ValidatesOnExceptions=True }"
-                                              ItemsSource="{Binding Source_TSmena}">
-                                        
+                                    <ComboBox Foreground="Aquamarine" Grid.Column="1" Grid.Row="0"
+                                              ItemsSource="{Binding TimesSmenas}"
+                                              SelectedItem="{Binding TimeSmena, Mode=TwoWay, ValidatesOnDataErrors=True, NotifyOnValidationError=True, ValidatesOnExceptions=True}">
+
                                     </ComboBox>
                                     <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" Grid.Row="1" Grid.ColumnSpan="2" >
                                         <TextBlock  Grid.Column="0" Grid.Row="0" Text="Начало смены" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="16"/>
                                         <DatePicker x:Name="tbPick" Style="{StaticResource DateInputError}" 
                                          Width="140" SelectedDateFormat="Short"
                                          materialDesign:HintAssist.Hint="Pick Date" FontSize="14" 
-                                             SelectedDate="{Binding Date_Smena, Mode=TwoWay,ValidatesOnDataErrors=True, NotifyOnValidationError=True, ValidatesOnExceptions=True }"/>
+                                             SelectedDate="{Binding DateSmena, Mode=TwoWay, ValidatesOnDataErrors=True, NotifyOnValidationError=True, ValidatesOnExceptions=True}"/>
                                     </StackPanel>
                                 </Grid>
                             </GroupBox>
@@ -171,18 +153,9 @@
                     <TextBlock Text="G.M.F" Margin="0,0,0,0" VerticalAlignment="Center" FontSize="16"/>
                 </Grid>
                 <Grid Grid.Column="1" Margin="10">
-                    <Button  Command="{Binding BtnCommand}" Grid.Row="4" Grid.Column="0"  Grid.ColumnSpan="4" Content="Подтвердить" Style="{StaticResource buttonNegative}" >
-                        <Button.IsEnabled>
-                            <MultiBinding Converter="{StaticResource BooleanAndConverter}">
-                                <Binding ElementName="tbFIO_Nach" Path="(Validation.HasError)" />
-                                <Binding ElementName="tbFIO_Lab" Path="(Validation.HasError)" />
-                                <Binding ElementName="tbNumber_Smena" Path="(Validation.HasError)" />
-                                <Binding ElementName="tbTime_Smena" Path="(Validation.HasError)" />
-                                <Binding ElementName="tbPick" Path="(Validation.HasError)" />
-                               
-                               
-                            </MultiBinding>
-                        </Button.IsEnabled>
+                    <Button  Command="{Binding AddAccountCommand, Mode=OneWay}"
+                             Grid.Row="4" Grid.Column="0"  Grid.ColumnSpan="4" Content="Подтвердить"
+                             Style="{StaticResource buttonNegative}">
                     </Button>
 
                 </Grid>

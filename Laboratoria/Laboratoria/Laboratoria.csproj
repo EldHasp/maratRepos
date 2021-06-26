@@ -37,6 +37,16 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug without DB|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug without DB\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Common">
       <HintPath>..\Common\bin\Debug\Common.dll</HintPath>
@@ -121,19 +131,21 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Class\BooleanAndConverter.cs" />
-    <Compile Include="Class\BooleanNotConverter.cs" />
     <Compile Include="Class\CountToVisibilityConverter.cs" />
     <Compile Include="Class\DataForRow.cs" />
     <Compile Include="Class\Validations.cs" />
     <Compile Include="Class\ValueDirection.cs" />
+    <Compile Include="Dto\AccDto.cs" />
+    <Compile Include="Dto\UserSmenaDto.cs" />
     <Compile Include="Migrations\202106040919543_InitialCreate.cs" />
     <Compile Include="Migrations\202106040919543_InitialCreate.designer.cs">
       <DependentUpon>202106040919543_InitialCreate.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
-    <Compile Include="Models\AccModel.cs" />
-    <Compile Include="Models\UserSmena.cs" />
-    <Compile Include="Models\UsersSmenaContext.cs" />
+    <Compile Include="Model\AccEntity.cs" />
+    <Compile Include="Model\UserSmenaEntity.cs" />
+    <Compile Include="Model\UsersModel.cs" />
+    <Compile Include="Model\UsersSmenaContext.cs" />
     <Compile Include="ViewModels\AccauntViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\UsersViewModel.cs" />
@@ -196,6 +208,11 @@
   <ItemGroup>
     <Folder Include="UserControl\" />
     <Folder Include="Window\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\binance.png" />
+    <Resource Include="Images\forex.png" />
+    <Resource Include="Images\Yobit.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\MaterialDesignThemes.4.1.0\build\MaterialDesignThemes.targets" Condition="Exists('..\packages\MaterialDesignThemes.4.1.0\build\MaterialDesignThemes.targets')" />

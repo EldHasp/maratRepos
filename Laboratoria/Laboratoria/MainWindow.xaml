@@ -9,7 +9,8 @@
         xmlns:ViewModels="clr-namespace:Laboratoria.ViewModels" x:Class="Laboratoria.MainWindow" 
         
         mc:Ignorable="d" 
-        Title="Лаборатория" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen" WindowStyle="None">
+        Title="Лаборатория" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen" WindowStyle="None"
+    d:DataContext="{x:Type ViewModels:MainViewModel}">
     <Window.Resources>
         <Storyboard x:Key="OpenMenu">
             <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[2].(RotateTransform.Angle)" Storyboard.TargetName="rectangle">
@@ -50,14 +51,6 @@
 
 
     </Window.Resources>
-
-
-
-    <Window.DataContext>
-        <ViewModels:MainViewModel/>
-    </Window.DataContext>
-
-
 
     <Grid Background="#5080fc">
         <Grid.ColumnDefinitions>
@@ -103,19 +96,19 @@
                 <ListView x:Name="ListViewMenu" Background="#FF116FA4" Foreground="White" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectionChanged="ListViewMenu_SelectionChanged" FontSize="16" FontWeight="Bold" >
                     <ListViewItem x:Name="ItemBinance" Height="70"  Style="{StaticResource ListViewItemOptionStyle}" >
                         <StackPanel Orientation="Horizontal">
-                            <Image Source="binance.png"  Height="25" Width="25" Margin="10"/>
+                            <Image Source="Images/binance.png"  Height="25" Width="25" Margin="10"/>
                             <TextBlock Text="Тамбуры за смену" VerticalAlignment="Center"  Margin="25 10"/>
                         </StackPanel>
                     </ListViewItem>
                     <ListViewItem x:Name="ItemCreate" Height="70"  FontFamily="Tahoma" FontSize="16" FontWeight="Bold" Style="{StaticResource ListViewItemOptionStyle}" >
                         <StackPanel Orientation="Horizontal">
-                            <Image Source="Yobit.png" Height="25" Width="25" Margin="10"/>
+                            <Image Source="Images/Yobit.png" Height="25" Width="25" Margin="10"/>
                             <TextBlock Text="Сменные отчеты" VerticalAlignment="Center"  Margin="25 10"/>
                         </StackPanel>
                     </ListViewItem>
                     <ListViewItem Height="70" Style="{StaticResource ListViewItemOptionStyle}" >
                         <StackPanel Orientation="Horizontal">
-                            <Image Source="forex.png" Height="25" Width="25" Margin="10"/>
+                            <Image Source="Images/forex.png" Height="25" Width="25" Margin="10"/>
                             <TextBlock Text="Отчет за период" VerticalAlignment="Center"  Margin="25 10"/>
                         </StackPanel>
                     </ListViewItem>
@@ -191,9 +184,10 @@
             </StackPanel>
         </Grid>
         <Border BorderBrush="Gray" BorderThickness="2" Grid.Column="1" Grid.Row="1"  >
-            <Grid x:Name="GridMain"  >
+            <!--<Grid x:Name="GridMain"  >
                 <TextBlock Text="Печатные формы" Foreground="White" />
-            </Grid>
+            </Grid>-->
+            <DataGrid ItemsSource="{Binding Accounts}" />
         </Border>
 
 

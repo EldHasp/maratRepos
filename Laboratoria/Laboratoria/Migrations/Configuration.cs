@@ -1,11 +1,9 @@
 ﻿namespace Laboratoria.Migrations
 {
-    using System;
-    using System.Data.Entity;
+    using Laboratoria.Contexts;
     using System.Data.Entity.Migrations;
-    using System.Linq;
 
-    internal sealed class Configuration : DbMigrationsConfiguration<Laboratoria.Models.UsersSmenaContext>
+    internal sealed class Configuration : DbMigrationsConfiguration<UsersSmenaContext>
     {
         public Configuration()
         {
@@ -13,7 +11,7 @@
             ContextKey = "Laboratoria.Models.UsersSmenaContext";
         }
 
-        protected override void Seed(Laboratoria.Models.UsersSmenaContext context)
+        protected override void Seed(UsersSmenaContext context)
         {
             //  This method will be called after migrating to the latest version.
 

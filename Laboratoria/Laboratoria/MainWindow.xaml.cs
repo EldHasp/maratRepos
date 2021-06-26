@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Laboratoria.Model;
+using Laboratoria.ViewModels;
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -13,9 +15,14 @@ namespace Laboratoria
     public partial class MainWindow : Window
     {
         bool StateClosed = true;
+
+        private readonly MainViewModel viewModel;
         public MainWindow()
         {
             InitializeComponent();
+
+            DataContext = viewModel = new MainViewModel(new UsersModel());
+
             this.SourceInitialized += Window1_SourceInitialized;
             // задаем размеры основного окна
             Rect rec = SystemParameters.WorkArea;
@@ -125,6 +132,7 @@ namespace Laboratoria
         private void BtnAccount_Click(object sender, RoutedEventArgs e)
         {
             WindowAccaunt Window_Accaunt = new WindowAccaunt();
+            Window_Accaunt.DataContext = new AccauntViewModel(viewModel.Model);
             Window_Accaunt.Show();
         }
 
