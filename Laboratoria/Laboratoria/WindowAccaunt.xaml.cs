@@ -25,7 +25,7 @@ namespace Laboratoria
     {
 
         //private Validations _validation = new Validations();  
-        private Dispatcher dispatcher = Dispatcher.CurrentDispatcher;
+        //private Dispatcher dispatcher = Dispatcher.CurrentDispatcher;
 
         public WindowAccaunt()
         {

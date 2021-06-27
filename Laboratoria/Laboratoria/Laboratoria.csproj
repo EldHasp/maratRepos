@@ -143,6 +143,9 @@
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model\AccEntity.cs" />
+    <Compile Include="Model\ChainChangedArgs.cs" />
+    <Compile Include="Model\NotifyChainChangedAction.cs" />
+    <Compile Include="Model\NotifyChainChangedHandler.cs" />
     <Compile Include="Model\UserSmenaEntity.cs" />
     <Compile Include="Model\UsersModel.cs" />
     <Compile Include="Model\UsersSmenaContext.cs" />

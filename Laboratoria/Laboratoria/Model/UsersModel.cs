@@ -1,4 +1,4 @@
-﻿#define withoutDB
+﻿#define withoutDB // Переменная конфигураци определяющая сборку для тестовой работы без БД.
 using Laboratoria.Contexts;
 
 using Laboratoria.Dto;
@@ -13,6 +13,7 @@ namespace Laboratoria.Model
 {
     public class UsersModel
     {
+        // Для работы без БД создаются тестовые коллекци для имитации таблиц БД.
 #if withoutDB
         private IReadOnlyList<string> positions = Array.AsReadOnly(new string[] { "Начальник", "Лаборант" });
         private UserSmenaEntity[] users =
@@ -39,6 +40,7 @@ namespace Laboratoria.Model
         {
             using (UsersSmenaContext ctx = new UsersSmenaContext())
             {
+                // Если сборка без БД, то возврат по тестовым таблицам.
 #if withoutDB
                 return users.Select(Create).ToList();
 #else
@@ -60,6 +62,15 @@ namespace Laboratoria.Model
         public async Task<IReadOnlyList<AccDto>> GetAccountsAsync()
             => await Task.Run(GetAccounts);
 
+        /// <summary>Создание акка по полученным данным и запись его в БД.</summary>
+        /// <param name="nach">Начальник смены.</param>
+        /// <param name="lab">Лаборант.</param>
+        /// <param name="nameSmena">Название смены.</param>
+        /// <param name="startSmena">Начало смены.</param>
+        /// <param name="endSmena">Конец смены.</param>
+        /// <returns>Если удалось создать акк и добавить его в БД,
+        /// то возвращается этот акк. <br/>
+        /// Иначе возвращается <see langword="null"/>.</returns>
         public AccDto AddAccount(UserSmenaDto nach, UserSmenaDto lab, string nameSmena, DateTime startSmena, DateTime endSmena)
         {
             AccDto acc = new AccDto(nach, lab, nameSmena, startSmena, endSmena);
@@ -72,48 +83,26 @@ namespace Laboratoria.Model
             => await Task.Run(() => AddAccount(nach, lab, nameSmena, startSmena, endSmena));
 
 
-
+        /// <summary>Событие извещающее об изменении коллекции Accounts.
+        /// Это коллекци отражает таблицу акков из БД.</summary>
         public NotifyChainChangedHandler<AccDto> AccountsChanged;
 
+        /// <summary>Вспомогательный метод для создания события
+        /// о добавлении одного акка.</summary>
+        /// <param name="acc">Добавленный акк.</param>
         protected void RaiseAddAccountsChanged(AccDto acc)
             => AccountsChanged?.Invoke(this, ChainChangedArgs<AccDto>.Add(acc));
+
+        /// <summary>Вспомогательный метод для создания события
+        /// о удалении одного акка.</summary>
+        /// <param name="acc">Удалённый акк.</param>
         protected void RaiseRemoveAccountsChanged(AccDto acc)
             => AccountsChanged?.Invoke(this, ChainChangedArgs<AccDto>.Remove(acc));
+
+        /// <summary>Вспомогательный метод для создания события
+        /// об очистке Accounts.</summary>
         protected void RaiseClearAccountsChanged(AccDto acc)
             => AccountsChanged?.Invoke(this, ChainChangedArgs<AccDto>.ClearArgs);
 
     }
-
-    public enum NotifyChainChangedAction
-    {
-        Clear,
-        Add,
-        Remove
-    }
-
-    public class ChainChangedArgs<T> 
-    {
-        public NotifyChainChangedAction Action { get; }
-        public IReadOnlyList<T> Items { get; }
-
-        protected ChainChangedArgs(NotifyChainChangedAction action, IReadOnlyList<T> items)
-        {
-            Action = action;
-            Items = items;
-        }
-
-        public static ChainChangedArgs<T> Add(T item)
-            => new ChainChangedArgs<T>(NotifyChainChangedAction.Add, Array.AsReadOnly(new T[] { item }));
-        public static ChainChangedArgs<T> Add(IEnumerable<T> items)
-            => new ChainChangedArgs<T>(NotifyChainChangedAction.Add, Array.AsReadOnly(items.ToArray()));
-        public static ChainChangedArgs<T> Remove(T item)
-            => new ChainChangedArgs<T>(NotifyChainChangedAction.Remove, Array.AsReadOnly(new T[] { item }));
-        public static ChainChangedArgs<T> Remove(IEnumerable<T> items)
-            => new ChainChangedArgs<T>(NotifyChainChangedAction.Remove, Array.AsReadOnly(items.ToArray()));
-        public static ChainChangedArgs<T> ClearArgs { get; }
-            = new ChainChangedArgs<T>(NotifyChainChangedAction.Clear, null);
-
-    }
-
-    public delegate void NotifyChainChangedHandler<T>(object sender, ChainChangedArgs<T> args);
 }
